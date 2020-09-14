@@ -1,5 +1,5 @@
-// const puppeteer = require('puppeteer');
-import puppeteer from 'puppeteer';
+const puppeteer = require('puppeteer')
+// import puppeteer from 'puppeteer';
 // const nameList = [
 // 	'Martin Luther King Jr.',
 // 	'Harriet Tubman',
@@ -18,54 +18,51 @@ import puppeteer from 'puppeteer';
 // 	'Carter G. Woodson',
 // ];
 
-export const nameURL = (name) => {
-			const endpoint = 'https://www.biography.com/activist/';
-			let nameAlt = name.toLowerCase().replace(/\s/g, '-');
-			if (nameAlt.includes('.')) {
-				return endpoint + nameAlt.replace(/\./g, '');
-			} else {
-				return endpoint + nameAlt;
-			}
-		};
- 
-    
+// const nameURL = (name) => {
+//   const endpoint = 'https://www.biography.com/activist/'
+//   let nameAlt = name.toLowerCase().replace(/\s/g, '-')
+//   if (nameAlt.includes('.')) {
+//     return endpoint + nameAlt.replace(/\./g, '')
+//   }
+//   return endpoint + nameAlt
+// }
 
-export const bhParse = async function (nameURL){
-    try {
-			/* Initiate the Puppeteer browser */
-			const browser = await puppeteer.launch();
-			const page = await browser.newPage();
-            
-			// Removes navigation Timeout
-			await page.setDefaultNavigationTimeout(0);
-			/* Go to the page and wait for it to load */
-			await page.goto(nameURL, { waitUntil: 'networkidle0' });
+const bhParse = async function (link) {
+  /* Initiate the Puppeteer browser */
+  try {
+    const browser = await puppeteer.launch()
+    const page = await browser.newPage()
+    // Removes navigation Timeout
+    // page.setDefaultNavigationTimeout(0)
 
-			/* Run javascript inside of the page */
-			let data = await page.evaluate(() => {
-				let dates = document.querySelector(
-					'.m-detail-header--person-occupations'
-				).innerHTML;
-				let merit = document.querySelector('.m-person--abstract').innerHTML;
-				let image = document.querySelector('.m-person--image img').src;
-				/* Returning an object filled with the scraped data */
-				return {
-					dates,
-					merit,
-					image,
-				};
-			});
+    /* Go to the page and wait for it to load */
+    console.log('navigate to: ', link)
+    await page.goto(link, { waitUntil: 'networkidle0', timeout: 0 })
 
-			/* Outputting what we scraped */
-			console.log(data);
-
-			await browser.close();
-		} catch (error) {
-        console.error(error);
-    }
-};
+    /* Run javascript inside of the page */
+    const data = await page.evaluate(() => {
+      console.log('RUN DATA SCRAPPER')
+      const dates = document.querySelector(
+        '.m-detail-header--person-occupations'
+      ).innerHTML
+      const merit = document.querySelector('.m-person--abstract').innerHTML
+      const image = document.querySelector('.m-person--image img').src
+      /* Returning an object filled with the scraped data */
+      return {
+        dates,
+        merit,
+        image,
+      }
+    })
+    console.log('data scraped: ', data)
+    return data
+    /* Outputting what we scraped */
+  } catch (error) {
+    console.log('ERROR: ', error)
+  }
+}
 
 // const res = nameURLs.map((nameURL) => bhParse(nameURL));
 // console.log(res);
 
-// module.exports = bhParse;
+module.exports = bhParse
